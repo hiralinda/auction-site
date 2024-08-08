@@ -23,7 +23,7 @@ This is a Django-based auction site created as part of the CS50 Web Programming 
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/auction-site.git
+    git clone https://github.com/hiralinda/auction-site.git
     cd auction-site
     ```
 
