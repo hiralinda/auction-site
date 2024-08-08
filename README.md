@@ -1,6 +1,6 @@
 # Auction Site
 
-This is a Django-based auction site created as part of the CS50 Web Programming with Python and JavaScript course's (Projects)[https://cs50.harvard.edu/web/2020/projects/2/commerce/], that allows users to create and bid on auction listings, add items to a watchlist, and leave comments. The site supports user authentication and features an admin interface for managing listings, bids, and comments. Tailwind CSS is used for styling the frontend.
+This is a Django-based auction site created as part of the CS50 Web Programming with Python and JavaScript course's [Projects](https://cs50.harvard.edu/web/2020/projects/2/commerce/), that allows users to create and bid on auction listings, add items to a watchlist, and leave comments. The site supports user authentication and features an admin interface for managing listings, bids, and comments. Tailwind CSS is used for styling the frontend.
 
 ## Video Preview
 
