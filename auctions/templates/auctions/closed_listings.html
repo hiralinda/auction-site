@@ -1,0 +1,71 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Closed Listings</h2>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for listing in listings %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:scale-105">
+      {% if listing.image_url %}
+      <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="w-full h-48 object-cover">
+      {% else %}
+      <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+        <span class="text-gray-500">No image available</span>
+      </div>
+      {% endif %}
+      <div class="p-4">
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ listing.title }} <small> by {{ listing.owner }} </small></h3>
+        <p class="text-gray-500 text-sm mb-2">Closed at: {{ listing.updated_at|date:"F j, Y" }}</p>
+        <p class="text-gray-600 mb-3 line-clamp-5">{{ listing.description }}</p>
+        <p class="text-lg font-bold text-blue-600 mb-4">
+          Final Price: ${{ listing.current_bid|default:listing.starting_bid }}
+        </p>
+        {% if listing.winner %}
+            <p class="text-green-600 font-semibold mb-4">Winner: {{ listing.winner.username }}</p>
+        {% else %}
+            <p class="text-red-600 font-semibold mb-4">No winner (No bids placed)</p>
+        {% endif %}
+       
+        <a href="{% url 'listing' listing.id %}" class="block">
+          <button type="button" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
+            View Details
+          </button>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <p class="col-span-full text-center text-gray-500">No closed listings available.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if listings.has_other_pages %}
+  <div class="flex justify-center mt-8">
+    <nav class="inline-flex rounded-md shadow">
+      {% if listings.has_previous %}
+        <a href="?page={{ listings.previous_page_number }}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          Previous
+        </a>
+      {% endif %}
+      
+      {% for i in listings.paginator.page_range %}
+        {% if listings.number == i %}
+          <span class="px-3 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+            {{ i }}
+          </span>
+        {% else %}
+          <a href="?page={{ i }}" class="px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            {{ i }}
+          </a>
+        {% endif %}
+      {% endfor %}
+      
+      {% if listings.has_next %}
+        <a href="?page={{ listings.next_page_number }}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          Next
+        </a>
+      {% endif %}
+    </nav>
+  </div>
+  {% endif %}
+{% endblock %}

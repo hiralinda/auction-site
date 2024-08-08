@@ -1,0 +1,124 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}{{ listing.title }}{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ listing.title }}</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <div>
+      {% if listing.image_url %}
+        <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="w-full h-auto rounded-lg shadow-md">
+      {% else %}
+        <div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span class="text-gray-500">No image available</span>
+        </div>
+      {% endif %}
+    </div>
+    
+    <div>
+      <p class="text-gray-600 mb-4 text-justify">{{ listing.description }}</p>
+      
+      <p class="text-lg font-semibold mb-2">Starting Bid: <span class="text-blue-600">${{ listing.starting_bid }}</span></p>
+      <p class="text-lg font-semibold mb-2">Current Price: <span class="text-blue-600">${{ listing.current_bid|default:listing.starting_bid }}</span></p>
+      <p class="mb-2">Category: <span class="font-medium">{{ listing.category }}</span></p>
+      <p class="mb-4">Status: <span class="font-medium {% if listing.active %}text-green-600{% else %}text-red-600{% endif %}">
+        {% if listing.active %}Active{% else %}Closed{% endif %}
+      </span></p>
+      {% if not listing.active %}
+        {% if listing.winner %}
+              <p class="text-green-600 font-semibold mb-4">Winner: {{ listing.winner.username }}</p>
+          {% else %}
+              <p class="text-red-600 font-semibold mb-4">No winner (No bids placed)</p>
+          {% endif %}
+      {% endif %}
+      {% if request.user.is_authenticated %}
+        <form method="post" class="mb-4">
+          {% csrf_token %}
+          <button type="submit" name="watchlist" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
+            {% if is_watchlisted %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+          </button>
+        </form>
+
+        {% if listing.active %}
+          {% if request.user != listing.owner %}
+            <h3 class="text-xl font-semibold mb-2">Place a Bid</h3>
+            <form method="post" class="mb-4">
+              {% csrf_token %}
+              <div class="mb-4">
+                <div class="flex items-center">
+                  <span class="mr-2 text-gray-700">$</span>
+                  <input id="bid_amount" name="bid_amount" type="number" step="0.01" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+              </div>
+              <button type="submit" name="bid" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition duration-300">
+                Place Bid
+              </button>
+            </form> 
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="px-6 py-4 border-0 rounded relative mb-4 
+                                {% if message.tags %}{{ message.tags }}{% endif %} 
+                                {% if message.level_tag == 'error' %}bg-red-500{% else %}bg-green-500{% endif %}">
+                        <span class="text-xl inline-block mr-5 align-middle">
+                            <i class="fas fa-bell"></i>
+                        </span>
+                        <span class="inline-block align-middle mr-8">
+                            <b class="capitalize">{{ message.level_tag }}!</b> {{ message }}
+                        </span>
+                        <button class="absolute bg-transparent text-2xl font-semibold leading-none right-0 top-0 mt-4 mr-6 outline-none focus:outline-none" onclick="this.parentElement.remove();">
+                            <span>×</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+            
+          {% else %}
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" name="close_auction" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-300">
+                Close Auction
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          {% if highest_bid and highest_bid.bidder == request.user %}
+            <p class="text-lg font-semibold text-green-600">Congratulations! You won this auction.</p>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4">Comments</h3>
+    {% if request.user.is_authenticated %}
+    <form method="post" class="mb-6" action="{% url 'listing' listing.id %}">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="id_content" class="block text-gray-700 text-sm font-bold mb-2">Add a Comment</label>
+        <textarea id="id_content" name="content" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required></textarea>
+      </div>
+      <button type="submit" name="comment" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
+        Add Comment
+      </button>
+    </form>
+    {% endif %}
+
+    <div class="space-y-4">
+      {% for comment in comments %}
+        <div class="bg-gray-100 p-4 rounded-lg">
+          <p class="font-semibold mb-1">{{ comment.commenter.username }}</p>
+          <p class="text-gray-700">{{ comment.content }}</p>
+        </div>
+      {% empty %}
+        <p class="text-gray-500">No comments yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
